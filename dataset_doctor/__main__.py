@@ -1,6 +1,8 @@
-import sys
 import csv
+import sys
+
 from dataset_doctor.csv_reader import read_csv
+from dataset_doctor.profiling import get_dimensions
 
 
 def main() -> None:
@@ -11,16 +13,15 @@ def main() -> None:
     file_path = sys.argv[1]
 
     try:
-        rows = read_csv(file_path)
+        columns, rows = read_csv(file_path)
     except (OSError, UnicodeDecodeError, csv.Error, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    if rows:
-        print("Columns:", list(rows[0].keys()))
+    dimensions = get_dimensions(columns, rows)
 
-    for row in rows:
-        print(row)
+    print(f"Rows: {dimensions['rows']}")
+    print(f"Columns: {dimensions['columns']}")
 
 
 if __name__ == "__main__":
