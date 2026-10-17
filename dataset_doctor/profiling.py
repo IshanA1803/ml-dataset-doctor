@@ -26,3 +26,17 @@ def get_missing_values(columns: list[str],rows: list[dict[str, str]],) -> dict[s
         }
 
     return results
+
+def get_duplicate_count(columns: list[str],rows: list[dict[str, str]],) -> int:
+    seen = set()
+    duplicate_count = 0
+
+    for row in rows:
+        row_values = tuple(row[column] for column in columns)
+
+        if row_values in seen:
+            duplicate_count += 1
+        else:
+            seen.add(row_values)
+
+    return duplicate_count
