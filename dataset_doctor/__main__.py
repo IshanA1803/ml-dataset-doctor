@@ -1,5 +1,7 @@
+
 import argparse
 import csv
+import json
 import sys
 
 from dataset_doctor.csv_reader import read_csv
@@ -22,6 +24,12 @@ def main(argv: list[str] | None = None) -> int:
         "csv_file",
         help="Path to the CSV file to analyze.",
     )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format (default: text).",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -30,19 +38,26 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    dimensions = get_dimensions(columns, rows)
-    missing_values = get_missing_values(columns, rows)
-    duplicate_count = get_duplicate_count(columns, rows)
-    column_statistics = get_column_statistics(columns, rows)
-    outliers = get_outliers(columns, rows)
+    result = {
+        "dimensions": get_dimensions(columns, rows),
+        "missing_values": get_missing_values(columns, rows),
+        "duplicate_count": get_duplicate_count(columns, rows),
+        "column_statistics": get_column_statistics(columns, rows),
+        "outliers": get_outliers(columns, rows),
+    }
 
-    print_report(
-        dimensions,
-        missing_values,
-        duplicate_count,
-        column_statistics,
-        outliers,
-    )
+    if args.format == "json":
+        json.dump(result, sys.stdout, indent=2, allow_nan=False)
+        print()
+    else:
+        print_report(
+            result["dimensions"],
+            result["missing_values"],
+            result["duplicate_count"],
+            result["column_statistics"],
+            result["outliers"],
+        )
+
     return 0
 
 
