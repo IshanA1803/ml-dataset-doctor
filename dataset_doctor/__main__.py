@@ -9,11 +9,15 @@ from dataset_doctor.profiling import (
     get_column_statistics,
     get_outliers,
 )
+from dataset_doctor.reporting import print_report
 
 
 def main() -> None:
     if len(sys.argv) != 2:
-        print("Usage: python -m dataset_doctor <csv_file>", file=sys.stderr)
+        print(
+            "Usage: python -m dataset_doctor <csv_file>",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     file_path = sys.argv[1]
@@ -30,35 +34,13 @@ def main() -> None:
     column_statistics = get_column_statistics(columns, rows)
     outliers = get_outliers(columns, rows)
 
-    print(f"Rows: {dimensions['rows']}")
-    print(f"Columns: {dimensions['columns']}")
-
-    print("\nMissing values:")
-
-    for column, stats in missing_values.items():
-        print(
-            f"  {column}: {stats['count']} "
-            f"({stats['percentage']:.1f}%)"
-        )
-    
-    print(f"\nDuplicate rows: {duplicate_count}")
-
-    print("\nColumn statistics:")
-
-    for column, stats in column_statistics.items():
-        print(f"\n{column} ({stats['type']}):")
-
-        for name, value in stats.items():
-            if name != "type":
-                print(f"  {name}: {value}")
-    
-    print("\nPotential outliers:")
-
-    for column, stats in outliers.items():
-        print(f"  {column}: {stats['count']}")
-    
-        if stats["count"] > 0:
-            print(f"    Values: {stats['values']}")
+    print_report(
+        dimensions,
+        missing_values,
+        duplicate_count,
+        column_statistics,
+        outliers,
+    )
 
 
 if __name__ == "__main__":
