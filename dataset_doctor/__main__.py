@@ -1,3 +1,4 @@
+import argparse
 import csv
 import sys
 
@@ -12,21 +13,22 @@ from dataset_doctor.profiling import (
 from dataset_doctor.reporting import print_report
 
 
-def main() -> None:
-    if len(sys.argv) != 2:
-        print(
-            "Usage: python -m dataset_doctor <csv_file>",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    file_path = sys.argv[1]
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="ml-dataset-doctor",
+        description="Profile a CSV dataset and detect data-quality issues.",
+    )
+    parser.add_argument(
+        "csv_file",
+        help="Path to the CSV file to analyze.",
+    )
+    args = parser.parse_args(argv)
 
     try:
-        columns, rows = read_csv(file_path)
+        columns, rows = read_csv(args.csv_file)
     except (OSError, UnicodeDecodeError, csv.Error, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     dimensions = get_dimensions(columns, rows)
     missing_values = get_missing_values(columns, rows)
@@ -41,7 +43,8 @@ def main() -> None:
         column_statistics,
         outliers,
     )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
