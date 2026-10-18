@@ -6,6 +6,7 @@ from dataset_doctor.profiling import (
     get_dimensions,
     get_duplicate_count,
     get_missing_values,
+    get_column_statistics,
 )
 
 
@@ -25,6 +26,7 @@ def main() -> None:
     dimensions = get_dimensions(columns, rows)
     missing_values = get_missing_values(columns, rows)
     duplicate_count = get_duplicate_count(columns, rows)
+    column_statistics = get_column_statistics(columns, rows)
 
     print(f"Rows: {dimensions['rows']}")
     print(f"Columns: {dimensions['columns']}")
@@ -38,6 +40,15 @@ def main() -> None:
         )
     
     print(f"\nDuplicate rows: {duplicate_count}")
+
+    print("\nColumn statistics:")
+
+    for column, stats in column_statistics.items():
+        print(f"\n{column} ({stats['type']}):")
+    
+        for name, value in stats.items():
+            if name != "type":
+                print(f"  {name}: {value}")
 
 
 if __name__ == "__main__":
