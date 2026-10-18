@@ -81,3 +81,37 @@ def get_column_statistics(columns: list[str],rows: list[dict[str, str]],) -> dic
             }
 
     return results
+
+def get_outliers(columns: list[str],rows: list[dict[str, str]],) -> dict[str, dict]:
+    dataframe = pd.DataFrame(rows, columns=columns)
+    dataframe = dataframe.replace(r"^\s*$", pd.NA, regex=True)
+
+    results = {}
+
+    for column in columns:
+        values = dataframe[column].dropna()
+        numeric_values = pd.to_numeric(values, errors="coerce")
+
+        if values.empty or not numeric_values.notna().all():
+            continue
+
+        q1 = numeric_values.quantile(0.25)
+        q3 = numeric_values.quantile(0.75)
+        iqr = q3 - q1
+
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+
+        outliers = numeric_values[
+            (numeric_values < lower_bound)
+            | (numeric_values > upper_bound)
+        ]
+
+        results[column] = {
+            "lower_bound": float(lower_bound),
+            "upper_bound": float(upper_bound),
+            "count": int(len(outliers)),
+            "values": outliers.tolist(),
+        }
+
+    return results

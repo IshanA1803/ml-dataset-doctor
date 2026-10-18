@@ -7,6 +7,7 @@ from dataset_doctor.profiling import (
     get_duplicate_count,
     get_missing_values,
     get_column_statistics,
+    get_outliers,
 )
 
 
@@ -27,6 +28,7 @@ def main() -> None:
     missing_values = get_missing_values(columns, rows)
     duplicate_count = get_duplicate_count(columns, rows)
     column_statistics = get_column_statistics(columns, rows)
+    outliers = get_outliers(columns, rows)
 
     print(f"Rows: {dimensions['rows']}")
     print(f"Columns: {dimensions['columns']}")
@@ -45,10 +47,18 @@ def main() -> None:
 
     for column, stats in column_statistics.items():
         print(f"\n{column} ({stats['type']}):")
-    
+
         for name, value in stats.items():
             if name != "type":
                 print(f"  {name}: {value}")
+    
+    print("\nPotential outliers:")
+
+    for column, stats in outliers.items():
+        print(f"  {column}: {stats['count']}")
+    
+        if stats["count"] > 0:
+            print(f"    Values: {stats['values']}")
 
 
 if __name__ == "__main__":
